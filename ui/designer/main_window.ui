@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>368</height>
+    <width>459</width>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -154,17 +154,17 @@
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Tab 1</string>
+        <string>测量</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="1" column="0">
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QGroupBox" name="gb_config">
           <property name="title">
-           <string>config</string>
+           <string>配置</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <layout class="QGridLayout" name="gridLayout_2">
+            <layout class="QGridLayout" name="gl_config">
              <item row="3" column="1" colspan="2">
               <widget class="QDoubleSpinBox" name="dsp_fly_duration">
                <property name="decimals">
@@ -174,7 +174,7 @@
                 <double>0.100000000000000</double>
                </property>
                <property name="value">
-                <double>2.000000000000000</double>
+                <double>1.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -186,16 +186,16 @@
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="lbl_fly_duration_caption">
                <property name="text">
-                <string>fly_duration</string>
+                <string>单次飞行时长(s)</string>
                </property>
               </widget>
              </item>
              <item row="0" column="0">
               <widget class="QPushButton" name="btn_bind_game">
                <property name="text">
-                <string>bind</string>
+                <string>绑定窗口</string>
                </property>
               </widget>
              </item>
@@ -207,16 +207,16 @@
               </widget>
              </item>
              <item row="4" column="0">
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="lbl_fly_times_caption">
                <property name="text">
-                <string>fly_times</string>
+                <string>飞行次数</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QPushButton" name="btn_capture_start_click">
                <property name="text">
-                <string>capture_start</string>
+                <string>捕获起飞点</string>
                </property>
               </widget>
              </item>
@@ -240,7 +240,7 @@
              <item row="2" column="0">
               <widget class="QPushButton" name="btn_capture_action_click">
                <property name="text">
-                <string>capture_action</string>
+                <string>捕获目标点</string>
                </property>
               </widget>
              </item>
@@ -257,21 +257,24 @@
              <item row="0" column="1" colspan="2">
               <widget class="QLineEdit" name="le_window_name">
                <property name="text">
-                <string>HTID 与 中间件.md - Typora</string>
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>window</string>
                </property>
               </widget>
              </item>
              <item row="5" column="2">
               <widget class="QPushButton" name="btn_trace_toggle">
                <property name="text">
-                <string>trace</string>
+                <string>关闭轨迹</string>
                </property>
               </widget>
              </item>
              <item row="5" column="1">
               <widget class="QPushButton" name="btn_mask_toggle">
                <property name="text">
-                <string>mask</string>
+                <string>关闭蒙层</string>
                </property>
               </widget>
              </item>
@@ -281,16 +284,16 @@
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QTextEdit" name="te_result"/>
+         <widget class="QTextEdit" name="te_log"/>
         </item>
         <item row="1" column="1">
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="gb_status">
           <property name="title">
-           <string>status</string>
+           <string>状态</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <layout class="QGridLayout" name="gridLayout_6">
+            <layout class="QGridLayout" name="glstatus">
              <item row="1" column="1">
               <widget class="QLabel" name="lbl_status">
                <property name="minimumSize">
@@ -305,16 +308,16 @@
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="lbl_status_caption">
                <property name="text">
-                <string>status</string>
+                <string>当前状态</string>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_2">
+              <widget class="QLabel" name="lbl_height_caption">
                <property name="text">
-                <string>height</string>
+                <string>实时高度</string>
                </property>
               </widget>
              </item>
@@ -328,7 +331,7 @@
              <item row="0" column="1">
               <widget class="QLabel" name="lbl_timer">
                <property name="text">
-                <string>timer</string>
+                <string>0</string>
                </property>
               </widget>
              </item>
@@ -338,13 +341,13 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="gb_control">
           <property name="title">
-           <string>control</string>
+           <string>控制</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <layout class="QGridLayout" name="gridLayout_7">
+            <layout class="QGridLayout" name="gl_control">
              <item row="0" column="0">
               <widget class="QPushButton" name="btn_action">
                <property name="text">
@@ -355,7 +358,7 @@
              <item row="1" column="0">
               <widget class="QPushButton" name="btn_reset">
                <property name="text">
-                <string>reset</string>
+                <string>重置</string>
                </property>
               </widget>
              </item>
@@ -368,7 +371,7 @@
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Tab 2</string>
+        <string>预留</string>
        </attribute>
       </widget>
      </widget>

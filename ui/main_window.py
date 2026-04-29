@@ -1,6 +1,5 @@
 import ctypes
 import csv
-import json
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, Qt
@@ -13,9 +12,11 @@ from ui.generated.ui_main_window import Ui_MainWindow
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
-from utils import FlightMeasureTool, LogManager, WindowTool, CONFIG_PATH
+from utils import FlightMeasureTool, LogManager, WindowTool
+from config.paths import measurement_results_csv_path
+from config.flight_config import load_flight_config_dict, update_flight_config_dict
 
-RESULTS_CSV_PATH = CONFIG_PATH.parent / "measurement_results.csv"
+RESULTS_CSV_PATH = measurement_results_csv_path()
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -40,9 +41,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self._apply_theme()
         self._configure_widgets()
-        self._apply_ui_text()
 
-        self.log = LogManager(self.te_result)
+        self.log = LogManager(self.te_log)
 
         self.measure.height_changed.connect(self.update_height)
         self.measure.state_changed.connect(self.update_status)
@@ -79,7 +79,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
 
     def _configure_widgets(self):
-        self.te_result.setReadOnly(True)
+        self.te_log.setReadOnly(True)
         self.dsp_fly_duration.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
         self.sp_fly_times.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
         self.dsp_fly_duration.setMinimum(0.1)
@@ -87,34 +87,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.sp_fly_times.setMinimum(1)
         self.sp_fly_times.setMaximum(99)
 
-    def _apply_ui_text(self):
-        self.setWindowTitle("PetHunter 辅助测量台")
-        self.label.setText("当前状态")
-        self.label_2.setText("实时高度")
-        self.label_4.setText("单次飞行时长")
-        self.label_5.setText("飞行次数")
-        self.btn_action.setText("开始测量")
-        self.btn_reset.setText("重置")
-        self.btn_mask_toggle.setText("关闭蒙层")
-        self.btn_trace_toggle.setText("关闭轨迹")
-        self.btn_bind_game.setText("重新绑定窗口")
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), "测量面板")
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), "预留")
-
     def _load_config(self) -> dict:
-        try:
-            with open(CONFIG_PATH, "r", encoding="utf-8") as file:
-                loaded = json.load(file)
-                return loaded if isinstance(loaded, dict) else {}
-        except Exception:
-            return {}
+        return load_flight_config_dict()
 
     def _save_config(self, updates: dict) -> None:
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        config = self._load_config()
-        config.update(updates)
-        with open(CONFIG_PATH, "w", encoding="utf-8") as file:
-            json.dump(config, file, ensure_ascii=False, indent=4)
+        update_flight_config_dict(updates)
 
     def _get_int_from_line_edit(self, line_edit, default=None):
         text = line_edit.text().strip()
@@ -162,7 +139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_status.setText("待命")
         self.lbl_height.setText("0.00 m")
         self.lbl_timer.setText("0.000 s")
-        self.te_result.setPlainText(
+        self.te_log.setPlainText(
             "PetHunter 辅助测量台\n"
             "等待开始测量...\n\n"
             "结果将汇总显示：\n"
@@ -426,7 +403,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 先禁用，等待上升全部结束后才启用标记落地按钮
         self.btn_action.setEnabled(False)
         self.lbl_status.setText("准备起飞")
-        self.te_result.setPlainText(
+        self.te_log.setPlainText(
             "测量进行中\n"
             f"单次飞行时长: {duration:.1f} s\n"
             f"飞行次数: {times}\n"
@@ -442,7 +419,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_action.setEnabled(True)
             return
 
-        self.te_result.setPlainText(self._format_result(data))
+        self.te_log.setPlainText(self._format_result(data))
         self.btn_action.setText("开始测量")
         self.is_measuring = False
         self.btn_action.setEnabled(True)

@@ -6,13 +6,15 @@ from PySide6.QtCore import QObject, QTimer, Signal
 
 import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+from config.paths import flight_config_path
 
 def get_base_path():
     if getattr(sys, 'frozen', False):
         return Path(sys.executable).parent.parent
     return Path(__file__).resolve().parent.parent
 
-CONFIG_PATH = get_base_path() / "runs" / "flight_config.json"
+CONFIG_PATH = flight_config_path()
 
 
 class FlightMeasureTool(QObject):
@@ -182,3 +184,5 @@ class FlightMeasureTool(QObject):
         self.time_remaining_changed.emit(0)
         self.height_changed.emit(0.0)
         self.state_changed.emit("待命")
+
+

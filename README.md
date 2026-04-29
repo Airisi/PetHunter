@@ -17,6 +17,10 @@
 ```text
 PetHunter/
 ├─ main.py                         # 程序入口
+├─ app/                            # 状态机/事件/编排（骨架已建）
+├─ features/                       # 测量/截图/识别/抓宠/对战（逐步迁移）
+├─ infrastructure/                 # Windows/输入/叠加层等平台能力（封装）
+├─ config/                         # runs 下配置与输出路径集中管理
 ├─ core/
 │  ├─ mask_overlay.py              # 游戏蒙层显示
 │  └─ mouse_trace_overlay.py       # 鼠标轨迹绘制蒙层
@@ -54,8 +58,8 @@ python main.py
 ## 使用说明（快速）
 
 1. 启动程序后，在“窗口标题”输入框中填入目标窗口标题关键字。
-2. 点击“重新绑定窗口”，确认日志显示绑定成功。
-3. 需要时点击“捕获起飞点击/捕获动作点击”，在目标窗口内点一次完成坐标捕获。
+2. 点击“绑定窗口”，确认日志显示绑定成功。
+3. 需要时点击“捕获起飞点/捕获目标点”，在目标窗口内点一次完成坐标捕获。
 4. 设置“单次飞行时长”和“飞行次数”。
 5. 点击“开始测量”，进入测量流程。
 6. 测量结束后点击“标记落地”，查看统计结果。
@@ -63,14 +67,14 @@ python main.py
 
 ## 配置与数据
 
-- 所有配置会写入：`runs/flight_config.json`
+- 所有配置会写入：`runs/configs/flight_config.json`
   - `window_name`：绑定成功的窗口名称关键字
   - `fly_duration`：单次飞行时长（秒）
   - `fly_times`：飞行次数
   - `start_click` / `action_click`：捕获到的起飞/动作点击坐标
   - `mask_enabled`：蒙板是否开启
   - `trace_enabled`：绘图轨迹是否开启
-- 每次测量结果会追加写入同一个 CSV：`runs/measurement_results.csv`（便于后续汇总对比）
+- 每次测量结果会追加写入同一个 CSV：`runs/measurements/measurement_results.csv`（便于后续汇总对比）
 
 ## 注意事项
 

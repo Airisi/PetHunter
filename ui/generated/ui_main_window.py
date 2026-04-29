@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(463, 368)
+        MainWindow.resize(459, 434)
         MainWindow.setStyleSheet(u"            QMainWindow {\n"
 "                background-color: #2b2d30;\n"
 "            }\n"
@@ -169,156 +169,156 @@ class Ui_MainWindow(object):
         self.tab.setObjectName(u"tab")
         self.gridLayout = QGridLayout(self.tab)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.groupBox = QGroupBox(self.tab)
-        self.groupBox.setObjectName(u"groupBox")
-        self.verticalLayout = QVBoxLayout(self.groupBox)
+        self.gb_config = QGroupBox(self.tab)
+        self.gb_config.setObjectName(u"gb_config")
+        self.verticalLayout = QVBoxLayout(self.gb_config)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.gridLayout_2 = QGridLayout()
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.dsp_fly_duration = QDoubleSpinBox(self.groupBox)
+        self.gl_config = QGridLayout()
+        self.gl_config.setObjectName(u"gl_config")
+        self.dsp_fly_duration = QDoubleSpinBox(self.gb_config)
         self.dsp_fly_duration.setObjectName(u"dsp_fly_duration")
         self.dsp_fly_duration.setDecimals(1)
         self.dsp_fly_duration.setSingleStep(0.100000000000000)
-        self.dsp_fly_duration.setValue(2.000000000000000)
+        self.dsp_fly_duration.setValue(1.000000000000000)
 
-        self.gridLayout_2.addWidget(self.dsp_fly_duration, 3, 1, 1, 2)
+        self.gl_config.addWidget(self.dsp_fly_duration, 3, 1, 1, 2)
 
-        self.sp_fly_times = QSpinBox(self.groupBox)
+        self.sp_fly_times = QSpinBox(self.gb_config)
         self.sp_fly_times.setObjectName(u"sp_fly_times")
         self.sp_fly_times.setValue(1)
 
-        self.gridLayout_2.addWidget(self.sp_fly_times, 4, 1, 1, 2)
+        self.gl_config.addWidget(self.sp_fly_times, 4, 1, 1, 2)
 
-        self.label_4 = QLabel(self.groupBox)
-        self.label_4.setObjectName(u"label_4")
+        self.lbl_fly_duration_caption = QLabel(self.gb_config)
+        self.lbl_fly_duration_caption.setObjectName(u"lbl_fly_duration_caption")
 
-        self.gridLayout_2.addWidget(self.label_4, 3, 0, 1, 1)
+        self.gl_config.addWidget(self.lbl_fly_duration_caption, 3, 0, 1, 1)
 
-        self.btn_bind_game = QPushButton(self.groupBox)
+        self.btn_bind_game = QPushButton(self.gb_config)
         self.btn_bind_game.setObjectName(u"btn_bind_game")
 
-        self.gridLayout_2.addWidget(self.btn_bind_game, 0, 0, 1, 1)
+        self.gl_config.addWidget(self.btn_bind_game, 0, 0, 1, 1)
 
-        self.le_start_click_y = QLineEdit(self.groupBox)
+        self.le_start_click_y = QLineEdit(self.gb_config)
         self.le_start_click_y.setObjectName(u"le_start_click_y")
 
-        self.gridLayout_2.addWidget(self.le_start_click_y, 1, 2, 1, 1)
+        self.gl_config.addWidget(self.le_start_click_y, 1, 2, 1, 1)
 
-        self.label_5 = QLabel(self.groupBox)
-        self.label_5.setObjectName(u"label_5")
+        self.lbl_fly_times_caption = QLabel(self.gb_config)
+        self.lbl_fly_times_caption.setObjectName(u"lbl_fly_times_caption")
 
-        self.gridLayout_2.addWidget(self.label_5, 4, 0, 1, 1)
+        self.gl_config.addWidget(self.lbl_fly_times_caption, 4, 0, 1, 1)
 
-        self.btn_capture_start_click = QPushButton(self.groupBox)
+        self.btn_capture_start_click = QPushButton(self.gb_config)
         self.btn_capture_start_click.setObjectName(u"btn_capture_start_click")
 
-        self.gridLayout_2.addWidget(self.btn_capture_start_click, 1, 0, 1, 1)
+        self.gl_config.addWidget(self.btn_capture_start_click, 1, 0, 1, 1)
 
-        self.le_start_click_x = QLineEdit(self.groupBox)
+        self.le_start_click_x = QLineEdit(self.gb_config)
         self.le_start_click_x.setObjectName(u"le_start_click_x")
 
-        self.gridLayout_2.addWidget(self.le_start_click_x, 1, 1, 1, 1)
+        self.gl_config.addWidget(self.le_start_click_x, 1, 1, 1, 1)
 
-        self.le_action_click_y = QLineEdit(self.groupBox)
+        self.le_action_click_y = QLineEdit(self.gb_config)
         self.le_action_click_y.setObjectName(u"le_action_click_y")
 
-        self.gridLayout_2.addWidget(self.le_action_click_y, 2, 2, 1, 1)
+        self.gl_config.addWidget(self.le_action_click_y, 2, 2, 1, 1)
 
-        self.btn_capture_action_click = QPushButton(self.groupBox)
+        self.btn_capture_action_click = QPushButton(self.gb_config)
         self.btn_capture_action_click.setObjectName(u"btn_capture_action_click")
 
-        self.gridLayout_2.addWidget(self.btn_capture_action_click, 2, 0, 1, 1)
+        self.gl_config.addWidget(self.btn_capture_action_click, 2, 0, 1, 1)
 
-        self.le_action_click_x = QLineEdit(self.groupBox)
+        self.le_action_click_x = QLineEdit(self.gb_config)
         self.le_action_click_x.setObjectName(u"le_action_click_x")
 
-        self.gridLayout_2.addWidget(self.le_action_click_x, 2, 1, 1, 1)
+        self.gl_config.addWidget(self.le_action_click_x, 2, 1, 1, 1)
 
-        self.le_window_name = QLineEdit(self.groupBox)
+        self.le_window_name = QLineEdit(self.gb_config)
         self.le_window_name.setObjectName(u"le_window_name")
 
-        self.gridLayout_2.addWidget(self.le_window_name, 0, 1, 1, 2)
+        self.gl_config.addWidget(self.le_window_name, 0, 1, 1, 2)
 
-        self.btn_trace_toggle = QPushButton(self.groupBox)
+        self.btn_trace_toggle = QPushButton(self.gb_config)
         self.btn_trace_toggle.setObjectName(u"btn_trace_toggle")
 
-        self.gridLayout_2.addWidget(self.btn_trace_toggle, 5, 2, 1, 1)
+        self.gl_config.addWidget(self.btn_trace_toggle, 5, 2, 1, 1)
 
-        self.btn_mask_toggle = QPushButton(self.groupBox)
+        self.btn_mask_toggle = QPushButton(self.gb_config)
         self.btn_mask_toggle.setObjectName(u"btn_mask_toggle")
 
-        self.gridLayout_2.addWidget(self.btn_mask_toggle, 5, 1, 1, 1)
+        self.gl_config.addWidget(self.btn_mask_toggle, 5, 1, 1, 1)
 
 
-        self.verticalLayout.addLayout(self.gridLayout_2)
+        self.verticalLayout.addLayout(self.gl_config)
 
 
-        self.gridLayout.addWidget(self.groupBox, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.gb_config, 1, 0, 1, 1)
 
-        self.te_result = QTextEdit(self.tab)
-        self.te_result.setObjectName(u"te_result")
+        self.te_log = QTextEdit(self.tab)
+        self.te_log.setObjectName(u"te_log")
 
-        self.gridLayout.addWidget(self.te_result, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.te_log, 3, 0, 1, 1)
 
-        self.groupBox_2 = QGroupBox(self.tab)
-        self.groupBox_2.setObjectName(u"groupBox_2")
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox_2)
+        self.gb_status = QGroupBox(self.tab)
+        self.gb_status.setObjectName(u"gb_status")
+        self.verticalLayout_2 = QVBoxLayout(self.gb_status)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.gridLayout_6 = QGridLayout()
-        self.gridLayout_6.setObjectName(u"gridLayout_6")
-        self.lbl_status = QLabel(self.groupBox_2)
+        self.glstatus = QGridLayout()
+        self.glstatus.setObjectName(u"glstatus")
+        self.lbl_status = QLabel(self.gb_status)
         self.lbl_status.setObjectName(u"lbl_status")
         self.lbl_status.setMinimumSize(QSize(75, 0))
 
-        self.gridLayout_6.addWidget(self.lbl_status, 1, 1, 1, 1)
+        self.glstatus.addWidget(self.lbl_status, 1, 1, 1, 1)
 
-        self.label = QLabel(self.groupBox_2)
-        self.label.setObjectName(u"label")
+        self.lbl_status_caption = QLabel(self.gb_status)
+        self.lbl_status_caption.setObjectName(u"lbl_status_caption")
 
-        self.gridLayout_6.addWidget(self.label, 1, 0, 1, 1)
+        self.glstatus.addWidget(self.lbl_status_caption, 1, 0, 1, 1)
 
-        self.label_2 = QLabel(self.groupBox_2)
-        self.label_2.setObjectName(u"label_2")
+        self.lbl_height_caption = QLabel(self.gb_status)
+        self.lbl_height_caption.setObjectName(u"lbl_height_caption")
 
-        self.gridLayout_6.addWidget(self.label_2, 2, 0, 1, 1)
+        self.glstatus.addWidget(self.lbl_height_caption, 2, 0, 1, 1)
 
-        self.lbl_height = QLabel(self.groupBox_2)
+        self.lbl_height = QLabel(self.gb_status)
         self.lbl_height.setObjectName(u"lbl_height")
 
-        self.gridLayout_6.addWidget(self.lbl_height, 2, 1, 1, 1)
+        self.glstatus.addWidget(self.lbl_height, 2, 1, 1, 1)
 
-        self.lbl_timer = QLabel(self.groupBox_2)
+        self.lbl_timer = QLabel(self.gb_status)
         self.lbl_timer.setObjectName(u"lbl_timer")
 
-        self.gridLayout_6.addWidget(self.lbl_timer, 0, 1, 1, 1)
+        self.glstatus.addWidget(self.lbl_timer, 0, 1, 1, 1)
 
 
-        self.verticalLayout_2.addLayout(self.gridLayout_6)
+        self.verticalLayout_2.addLayout(self.glstatus)
 
 
-        self.gridLayout.addWidget(self.groupBox_2, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.gb_status, 1, 1, 1, 1)
 
-        self.groupBox_3 = QGroupBox(self.tab)
-        self.groupBox_3.setObjectName(u"groupBox_3")
-        self.verticalLayout_3 = QVBoxLayout(self.groupBox_3)
+        self.gb_control = QGroupBox(self.tab)
+        self.gb_control.setObjectName(u"gb_control")
+        self.verticalLayout_3 = QVBoxLayout(self.gb_control)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.gridLayout_7 = QGridLayout()
-        self.gridLayout_7.setObjectName(u"gridLayout_7")
-        self.btn_action = QPushButton(self.groupBox_3)
+        self.gl_control = QGridLayout()
+        self.gl_control.setObjectName(u"gl_control")
+        self.btn_action = QPushButton(self.gb_control)
         self.btn_action.setObjectName(u"btn_action")
 
-        self.gridLayout_7.addWidget(self.btn_action, 0, 0, 1, 1)
+        self.gl_control.addWidget(self.btn_action, 0, 0, 1, 1)
 
-        self.btn_reset = QPushButton(self.groupBox_3)
+        self.btn_reset = QPushButton(self.gb_control)
         self.btn_reset.setObjectName(u"btn_reset")
 
-        self.gridLayout_7.addWidget(self.btn_reset, 1, 0, 1, 1)
+        self.gl_control.addWidget(self.btn_reset, 1, 0, 1, 1)
 
 
-        self.verticalLayout_3.addLayout(self.gridLayout_7)
+        self.verticalLayout_3.addLayout(self.gl_control)
 
 
-        self.gridLayout.addWidget(self.groupBox_3, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.gb_control, 3, 1, 1, 1)
 
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QWidget()
@@ -342,31 +342,32 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"PetHunter", None))
-        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"config", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"fly_duration", None))
-        self.btn_bind_game.setText(QCoreApplication.translate("MainWindow", u"bind", None))
+        self.gb_config.setTitle(QCoreApplication.translate("MainWindow", u"\u914d\u7f6e", None))
+        self.lbl_fly_duration_caption.setText(QCoreApplication.translate("MainWindow", u"\u5355\u6b21\u98de\u884c\u65f6\u957f(s)", None))
+        self.btn_bind_game.setText(QCoreApplication.translate("MainWindow", u"\u7ed1\u5b9a\u7a97\u53e3", None))
         self.le_start_click_y.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Y", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"fly_times", None))
-        self.btn_capture_start_click.setText(QCoreApplication.translate("MainWindow", u"capture_start", None))
+        self.lbl_fly_times_caption.setText(QCoreApplication.translate("MainWindow", u"\u98de\u884c\u6b21\u6570", None))
+        self.btn_capture_start_click.setText(QCoreApplication.translate("MainWindow", u"\u6355\u83b7\u8d77\u98de\u70b9", None))
         self.le_start_click_x.setPlaceholderText(QCoreApplication.translate("MainWindow", u"X", None))
         self.le_action_click_y.setText("")
         self.le_action_click_y.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Y", None))
-        self.btn_capture_action_click.setText(QCoreApplication.translate("MainWindow", u"capture_action", None))
+        self.btn_capture_action_click.setText(QCoreApplication.translate("MainWindow", u"\u6355\u83b7\u76ee\u6807\u70b9", None))
         self.le_action_click_x.setText("")
         self.le_action_click_x.setPlaceholderText(QCoreApplication.translate("MainWindow", u"X", None))
-        self.le_window_name.setText(QCoreApplication.translate("MainWindow", u"HTID \u4e0e \u4e2d\u95f4\u4ef6.md - Typora", None))
-        self.btn_trace_toggle.setText(QCoreApplication.translate("MainWindow", u"trace", None))
-        self.btn_mask_toggle.setText(QCoreApplication.translate("MainWindow", u"mask", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"status", None))
+        self.le_window_name.setText("")
+        self.le_window_name.setPlaceholderText(QCoreApplication.translate("MainWindow", u"window", None))
+        self.btn_trace_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8f68\u8ff9", None))
+        self.btn_mask_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8499\u5c42", None))
+        self.gb_status.setTitle(QCoreApplication.translate("MainWindow", u"\u72b6\u6001", None))
         self.lbl_status.setText("")
-        self.label.setText(QCoreApplication.translate("MainWindow", u"status", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"height", None))
+        self.lbl_status_caption.setText(QCoreApplication.translate("MainWindow", u"\u5f53\u524d\u72b6\u6001", None))
+        self.lbl_height_caption.setText(QCoreApplication.translate("MainWindow", u"\u5b9e\u65f6\u9ad8\u5ea6", None))
         self.lbl_height.setText("")
-        self.lbl_timer.setText(QCoreApplication.translate("MainWindow", u"timer", None))
-        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"control", None))
+        self.lbl_timer.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.gb_control.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236", None))
         self.btn_action.setText(QCoreApplication.translate("MainWindow", u"action", None))
-        self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"reset", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"Tab 1", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
+        self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u7f6e", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"\u6d4b\u91cf", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u9884\u7559", None))
     # retranslateUi
 
