@@ -26,6 +26,15 @@ class WindowTool:
         return hwnd_list[0] if hwnd_list else 0
 
     @staticmethod
+    def get_window_title(hwnd: int) -> str:
+        if not hwnd or not win32gui.IsWindow(hwnd):
+            return ""
+        try:
+            return win32gui.GetWindowText(hwnd)
+        except Exception:
+            return ""
+
+    @staticmethod
     def get_window_rect(hwnd: int, client_area=False) -> tuple[int, int, int, int]:
         if not hwnd or not win32gui.IsWindow(hwnd):
             return 0, 0, 0, 0

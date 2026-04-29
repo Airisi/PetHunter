@@ -13,6 +13,138 @@
   <property name="windowTitle">
    <string>PetHunter</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">            QMainWindow {
+                background-color: #2b2d30;
+            }
+
+            QWidget {
+                background-color: #33363a;
+                color: #e8eaed;                 /* 主文字 */
+                font-family: &quot;Microsoft YaHei&quot;;
+                font-size: 9pt;
+            }
+
+            /* ================= Tab ================= */
+            QTabWidget::pane {
+                border: 1px solid #4a4f55;
+                background-color: #2f3236;
+                border-radius: 6px;
+                top: -1px;
+            }
+
+            QTabBar::tab {
+                background-color: #3a3f45;
+                border: 1px solid #555b62;
+                border-bottom: none;
+                padding: 6px 12px;
+                min-width: 86px;
+                color: #c7ccd1;                 /* 次文字 */
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+
+            QTabBar::tab:selected {
+                background-color: #2f3236;
+                color: #ffffff;
+            }
+
+            /* ================= Label ================= */
+            QLabel {
+                background-color: transparent;
+                color: #d0d6dc;                 /* 提升对比 */
+            }
+
+            /* ================= 输入控件 ================= */
+            QLineEdit, QSpinBox, QDoubleSpinBox, QTextEdit {
+                background-color: #1f2124;      /* 更深背景 */
+                border: 1px solid #5a6067;
+                border-radius: 4px;
+                color: #f2f4f6;                 /* 提亮文字 */
+                selection-background-color: #4c78a8;
+                selection-color: #ffffff;
+            }
+
+            QLineEdit {
+                padding: 4px 6px;
+            }
+
+            QSpinBox, QDoubleSpinBox {
+                padding: 4px 24px 4px 6px;
+            }
+
+            QSpinBox::up-button, QDoubleSpinBox::up-button {
+                subcontrol-origin: border;
+                subcontrol-position: top right;
+                width: 18px;
+                background-color: #3a3f45;
+                border-left: 1px solid #5a6067;
+                border-top-right-radius: 4px;
+            }
+
+            QSpinBox::down-button, QDoubleSpinBox::down-button {
+                subcontrol-origin: border;
+                subcontrol-position: bottom right;
+                width: 18px;
+                background-color: #35393e;
+                border-left: 1px solid #5a6067;
+                border-bottom-right-radius: 4px;
+            }
+
+            QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover,
+            QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
+                background-color: #4a5056;
+            }
+
+            /* ================= 按钮 ================= */
+            QPushButton {
+                background-color: #3c4147;
+                color: #e6e6e6;
+                border: 1px solid #666c73;
+                border-radius: 5px;
+                padding: 5px 10px;
+            }
+
+            QPushButton:hover {
+                background-color: #4a5056;
+            }
+
+            QPushButton:pressed {
+                background-color: #2f3338;
+            }
+
+            QPushButton:disabled {
+                background-color: #3a3f45;
+                color: #8b9198;
+            }
+
+            /* ================= 文本框 ================= */
+            QTextEdit {
+                padding: 6px;
+            }
+
+            /* ================= 滚动条 ================= */
+            QScrollBar:vertical {
+                background: #2a2d31;
+                width: 10px;
+                margin: 0px;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #5c636a;
+                border-radius: 5px;
+                min-height: 24px;
+            }
+
+            QScrollBar::handle:vertical:hover {
+                background: #7a828a;
+            }
+
+            QScrollBar::add-line:vertical,
+            QScrollBar::sub-line:vertical {
+                height: 0px;
+            }</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout">
     <item>

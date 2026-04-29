@@ -1,4 +1,6 @@
 import ctypes
+import csv
+import json
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, Qt
@@ -11,7 +13,9 @@ from ui.generated.ui_main_window import Ui_MainWindow
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
-from utils import FlightMeasureTool, LogManager, WindowTool
+from utils import FlightMeasureTool, LogManager, WindowTool, CONFIG_PATH
+
+RESULTS_CSV_PATH = CONFIG_PATH.parent / "measurement_results.csv"
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -30,6 +34,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.game_mask = GameMaskOverlay()
         self.mouse_trace_mask = MouseTraceOverlay()
         self._capture_target_kind = None
+        self._loading_config = True
+        self._cfg_mask_enabled = True
+        self._cfg_trace_enabled = True
 
         self._apply_theme()
         self._configure_widgets()
@@ -41,6 +48,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.measure.state_changed.connect(self.update_status)
         self.measure.time_remaining_changed.connect(self.on_time_remaining)
         self.measure.fly_finished.connect(self.on_fly_finished)
+        self.measure.falling_started.connect(self.on_falling_started)
+
+        # UI 参数变更时同步到配置文件
+        self.dsp_fly_duration.valueChanged.connect(self.on_fly_duration_changed)
+        self.sp_fly_times.valueChanged.connect(self.on_fly_times_changed)
 
         self.btn_action.clicked.connect(self.on_action)
         self.btn_reset.clicked.connect(self.on_reset)
@@ -50,9 +62,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btn_capture_start_click.clicked.connect(self.on_capture_start_click_once)
         self.btn_capture_action_click.clicked.connect(self.on_capture_action_click_once)
 
+        self._apply_config_on_startup()
         self._set_idle_view()
         self.bind_game_window()
-        self.toggle_mask()
+        self._apply_overlay_settings_from_config()
+        self._loading_config = False
 
     def _apply_theme(self):
         DWMWA_USE_IMMERSIVE_DARK_MODE = 20
@@ -62,140 +76,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             DWMWA_USE_IMMERSIVE_DARK_MODE,
             ctypes.byref(ctypes.c_int(1)),
             ctypes.sizeof(ctypes.c_int)
-        )
-        self.setStyleSheet(
-            """
-            QMainWindow {
-                background-color: #2b2d30;
-            }
-
-            QWidget {
-                background-color: #33363a;
-                color: #e8eaed;                 /* 主文字 */
-                font-family: "Microsoft YaHei";
-                font-size: 9pt;
-            }
-
-            /* ================= Tab ================= */
-            QTabWidget::pane {
-                border: 1px solid #4a4f55;
-                background-color: #2f3236;
-                border-radius: 6px;
-                top: -1px;
-            }
-
-            QTabBar::tab {
-                background-color: #3a3f45;
-                border: 1px solid #555b62;
-                border-bottom: none;
-                padding: 6px 12px;
-                min-width: 86px;
-                color: #c7ccd1;                 /* 次文字 */
-                border-top-left-radius: 5px;
-                border-top-right-radius: 5px;
-            }
-
-            QTabBar::tab:selected {
-                background-color: #2f3236;
-                color: #ffffff;
-            }
-
-            /* ================= Label ================= */
-            QLabel {
-                background-color: transparent;
-                color: #d0d6dc;                 /* 提升对比 */
-            }
-
-            /* ================= 输入控件 ================= */
-            QLineEdit, QSpinBox, QDoubleSpinBox, QTextEdit {
-                background-color: #1f2124;      /* 更深背景 */
-                border: 1px solid #5a6067;
-                border-radius: 4px;
-                color: #f2f4f6;                 /* 提亮文字 */
-                selection-background-color: #4c78a8;
-                selection-color: #ffffff;
-            }
-
-            QLineEdit {
-                padding: 4px 6px;
-            }
-
-            QSpinBox, QDoubleSpinBox {
-                padding: 4px 24px 4px 6px;
-            }
-
-            QSpinBox::up-button, QDoubleSpinBox::up-button {
-                subcontrol-origin: border;
-                subcontrol-position: top right;
-                width: 18px;
-                background-color: #3a3f45;
-                border-left: 1px solid #5a6067;
-                border-top-right-radius: 4px;
-            }
-
-            QSpinBox::down-button, QDoubleSpinBox::down-button {
-                subcontrol-origin: border;
-                subcontrol-position: bottom right;
-                width: 18px;
-                background-color: #35393e;
-                border-left: 1px solid #5a6067;
-                border-bottom-right-radius: 4px;
-            }
-
-            QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover,
-            QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
-                background-color: #4a5056;
-            }
-
-            /* ================= 按钮 ================= */
-            QPushButton {
-                background-color: #3c4147;
-                color: #e6e6e6;
-                border: 1px solid #666c73;
-                border-radius: 5px;
-                padding: 5px 10px;
-            }
-
-            QPushButton:hover {
-                background-color: #4a5056;
-            }
-
-            QPushButton:pressed {
-                background-color: #2f3338;
-            }
-
-            QPushButton:disabled {
-                background-color: #3a3f45;
-                color: #8b9198;
-            }
-
-            /* ================= 文本框 ================= */
-            QTextEdit {
-                padding: 6px;
-            }
-
-            /* ================= 滚动条 ================= */
-            QScrollBar:vertical {
-                background: #2a2d31;
-                width: 10px;
-                margin: 0px;
-            }
-
-            QScrollBar::handle:vertical {
-                background: #5c636a;
-                border-radius: 5px;
-                min-height: 24px;
-            }
-
-            QScrollBar::handle:vertical:hover {
-                background: #7a828a;
-            }
-
-            QScrollBar::add-line:vertical,
-            QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-            """
         )
 
     def _configure_widgets(self):
@@ -221,6 +101,63 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), "测量面板")
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), "预留")
 
+    def _load_config(self) -> dict:
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as file:
+                loaded = json.load(file)
+                return loaded if isinstance(loaded, dict) else {}
+        except Exception:
+            return {}
+
+    def _save_config(self, updates: dict) -> None:
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        config = self._load_config()
+        config.update(updates)
+        with open(CONFIG_PATH, "w", encoding="utf-8") as file:
+            json.dump(config, file, ensure_ascii=False, indent=4)
+
+    def _get_int_from_line_edit(self, line_edit, default=None):
+        text = line_edit.text().strip()
+        if not text:
+            return default
+        try:
+            return int(text)
+        except Exception:
+            return default
+
+    def _apply_config_on_startup(self) -> None:
+        """从配置文件初始化 UI（窗口名、飞行参数、按钮开关等）。"""
+        config = self._load_config()
+
+        self.dsp_fly_duration.setValue(float(config.get("fly_duration", self.dsp_fly_duration.value())))
+        self.sp_fly_times.setValue(int(config.get("fly_times", self.sp_fly_times.value())))
+
+        window_name = config.get("window_name", "")
+        self.le_window_name.setText(window_name)
+
+        start_click = config.get("start_click", {}) if isinstance(config.get("start_click", {}), dict) else {}
+        action_click = config.get("action_click", {}) if isinstance(config.get("action_click", {}), dict) else {}
+        self.le_start_click_x.setText(str(start_click.get("x", "")))
+        self.le_start_click_y.setText(str(start_click.get("y", "")))
+        self.le_action_click_x.setText(str(action_click.get("x", "")))
+        self.le_action_click_y.setText(str(action_click.get("y", "")))
+
+        self._cfg_mask_enabled = bool(config.get("mask_enabled", True))
+        self._cfg_trace_enabled = bool(config.get("trace_enabled", True))
+
+    def _apply_overlay_settings_from_config(self) -> None:
+        # Trace 独立于蒙层开关
+        self._set_trace_enabled(self._cfg_trace_enabled)
+        # 蒙层需要已绑定窗口后才能显示
+        if self._cfg_mask_enabled and self.game_mask.game_hwnd != 0:
+            self.game_mask.follow_game_window()
+            self.game_mask.show()
+            self.game_mask.raise_()
+            self.btn_mask_toggle.setText("关闭蒙层")
+        else:
+            self.game_mask.hide()
+            self.btn_mask_toggle.setText("开启蒙层")
+
     def _set_idle_view(self):
         self.lbl_status.setText("待命")
         self.lbl_height.setText("0.00 m")
@@ -237,6 +174,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.game_mask.update_info(0.0, "待命")
         self.game_mask.update_timer(0)
+
+    def _set_trace_enabled(self, enabled: bool) -> None:
+        self.mouse_trace_mask.set_trace_enabled(enabled)
+        self.btn_trace_toggle.setText("关闭轨迹" if enabled else "开启轨迹")
 
     def _get_time_str(self):
         return datetime.now().strftime("%H:%M:%S.%f")[:-3]
@@ -272,32 +213,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.game_mask.follow_game_window()
         self.log.success(f"窗口已绑定: {window_name}")
         self.game_mask.show_message("窗口绑定成功", 1800)
+        self._save_config({"window_name": window_name})
 
     def toggle_mask(self):
         if self.game_mask.isVisible():
             self.game_mask.hide()
-            self.mouse_trace_mask.hide()
             self.btn_mask_toggle.setText("开启蒙层")
             self.log.info("蒙层显示已关闭。\n")
+            self._save_config({"mask_enabled": False})
             return
 
         if self.game_mask.game_hwnd == 0:
             self.log.warning("请先绑定目标窗口，再开启蒙层。")
             return
 
-        self.mouse_trace_mask.follow_game_window()
-        self.mouse_trace_mask.show()
         self.game_mask.follow_game_window()
         self.game_mask.show()
         self.game_mask.raise_()
         self.btn_mask_toggle.setText("关闭蒙层")
         self.log.info("蒙层显示已开启。\n")
+        self._save_config({"mask_enabled": True})
 
     def toggle_trace(self):
         state = not self.mouse_trace_mask.trace_enabled
         self.mouse_trace_mask.set_trace_enabled(state)
-        self.btn_trace_toggle.setText("Hide Trace" if state else "Show Trace")
+        self.btn_trace_toggle.setText("关闭轨迹" if state else "开启轨迹")
         self.log.info("Trace display enabled.\n" if state else "Trace display disabled.\n")
+        self._save_config({"trace_enabled": state})
 
     def update_height(self, height):
         self.lbl_height.setText(f"{height:.2f} m")
@@ -314,6 +256,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.game_mask.update_timer(ms)
 
     def on_action(self):
+        self.btn_action.setEnabled(False)
         if self.is_measuring:
             self.on_land()
         else:
@@ -380,6 +323,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.log.info(
             f"Captured {self._capture_button_name(target_kind)} click position ({x}, {y})\n"
         )
+
+        if target_kind == "start":
+            self._save_config({"start_click": {"x": int(x), "y": int(y)}})
+        else:
+            self._save_config({"action_click": {"x": int(x), "y": int(y)}})
 
     def _resolve_click_target(self, target_kind="action"):
         if not self.game_hwnd:
@@ -448,6 +396,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.measure.fly_duration = duration
         self.measure.save_config()
+        self._save_config({"fly_duration": duration, "fly_times": times})
 
         try:
             import win32api
@@ -474,6 +423,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.btn_action.setText("标记落地")
         self.is_measuring = True
+        # 先禁用，等待上升全部结束后才启用标记落地按钮
+        self.btn_action.setEnabled(False)
         self.lbl_status.setText("准备起飞")
         self.te_result.setPlainText(
             "测量进行中\n"
@@ -487,26 +438,92 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_land(self):
         data = self.measure.mark_land(0.0)
         if not data:
-            self.log.warning("当前还未进入下落阶段，无法标记落地。\n")
+            # 理论上按钮在上升阶段会被禁用，这里避免误触造成用户卡住
+            self.btn_action.setEnabled(True)
             return
 
         self.te_result.setPlainText(self._format_result(data))
         self.btn_action.setText("开始测量")
         self.is_measuring = False
+        self.btn_action.setEnabled(True)
         self.lbl_status.setText("测量完成")
         self.lbl_timer.setText("0.000 s")
         self.game_mask.show_message("测量已完成", 2200)
+        self._append_result_to_csv(data)
+
+    def on_falling_started(self):
+        """全部上升完成、进入等待标记落地阶段时启用按钮。"""
+        if self.is_measuring:
+            self.btn_action.setEnabled(True)
 
     def on_reset(self):
         WindowTool.stop_capture_click()
         self.measure.reset()
         self.btn_action.setText("开始测量")
+        self.btn_action.setEnabled(True)
         self.is_measuring = False
         self.game_mask.clear_trace()
         self.mouse_trace_mask.clear_paths()
+        self.btn_capture_start_click.setEnabled(True)
         self.btn_capture_action_click.setEnabled(True)
+        self._capture_target_kind = None
+        # 保持当前配置的蒙层/轨迹状态，不强制关闭；只恢复面板显示
         self._set_idle_view()
         self.log.info("测量状态已重置。\n")
+
+    def on_fly_duration_changed(self, _value):
+        if self._loading_config:
+            return
+        self._save_config({"fly_duration": float(self.dsp_fly_duration.value())})
+
+    def on_fly_times_changed(self, _value):
+        if self._loading_config:
+            return
+        self._save_config({"fly_times": int(self.sp_fly_times.value())})
+
+    def _append_result_to_csv(self, data: dict) -> None:
+        RESULTS_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+        header = [
+            "timestamp",
+            "window_name",
+            "fly_duration",
+            "fly_times",
+            "start_click_x",
+            "start_click_y",
+            "action_click_x",
+            "action_click_y",
+            "mask_enabled",
+            "trace_enabled",
+            "single_height",
+            "total_rise",
+            "rise_speed",
+            "total_fly_time",
+            "fall_height",
+            "fall_time",
+            "fall_speed",
+        ]
+
+        row = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "window_name": self.le_window_name.text().strip(),
+            "fly_duration": float(self.dsp_fly_duration.value()),
+            "fly_times": int(self.sp_fly_times.value()),
+            "start_click_x": self._get_int_from_line_edit(self.le_start_click_x, None),
+            "start_click_y": self._get_int_from_line_edit(self.le_start_click_y, None),
+            "action_click_x": self._get_int_from_line_edit(self.le_action_click_x, None),
+            "action_click_y": self._get_int_from_line_edit(self.le_action_click_y, None),
+            "mask_enabled": bool(self.game_mask.isVisible()),
+            "trace_enabled": bool(self.mouse_trace_mask.trace_enabled),
+        }
+        row.update(data)
+
+        file_exists = RESULTS_CSV_PATH.exists() and RESULTS_CSV_PATH.stat().st_size > 0
+        with open(RESULTS_CSV_PATH, "a", newline="", encoding="utf-8-sig") as f:
+            writer = csv.DictWriter(f, fieldnames=header)
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow({k: ("" if row.get(k, None) is None else row.get(k, "")) for k in header})
 
     def on_topmost(self):
         is_top = self.windowFlags() & Qt.WindowStaysOnTopHint

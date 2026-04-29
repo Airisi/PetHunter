@@ -22,6 +22,8 @@ class FlightMeasureTool(QObject):
     state_changed = Signal(str)
     time_remaining_changed = Signal(int)
     fly_finished = Signal(int, int)
+    # 全部上升结束，进入“等待标记落地”阶段时触发
+    falling_started = Signal()
 
     def __init__(self):
         super().__init__()
@@ -56,7 +58,17 @@ class FlightMeasureTool(QObject):
             self.save_config()
 
     def save_config(self):
-        config = {"fly_duration": self.fly_duration}
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        config = {}
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as file:
+                loaded = json.load(file)
+                if isinstance(loaded, dict):
+                    config = loaded
+        except Exception:
+            config = {}
+
+        config["fly_duration"] = self.fly_duration
         with open(CONFIG_PATH, "w", encoding="utf-8") as file:
             json.dump(config, file, ensure_ascii=False, indent=4)
 
@@ -77,6 +89,7 @@ class FlightMeasureTool(QObject):
             self.peak_height = self.current_height
             self.state_changed.emit("全部上升完成，等待标记落地")
             self.is_falling = True
+            self.falling_started.emit()
             self._fall_start_time = time.perf_counter()
             self._timer.stop()
             self.time_remaining_changed.emit(0)
