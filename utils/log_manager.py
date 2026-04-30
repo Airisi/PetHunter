@@ -30,8 +30,10 @@ class LogManager:
 
         self._init_context_menu()
 
-        self.debug_enabled = False  # 是否启用调试日志
-        self.show_time = True
+        self.debug_enabled = False        # 是否显示调试信息
+        self.show_time = True             # 是否显示时间戳
+        self.show_us = True               # 是否显示微秒
+        self.merge_repeat_enabled = False # 是否合并重复
 
     # ================== 右键菜单 ==================
     def _init_context_menu(self):
@@ -62,32 +64,39 @@ class LogManager:
     # ================== 核心日志 ==================
     def _append(self, text: str, color: str):
         """
-        向 QTextBrowser 添加日志，并根据 self.show_time 控制是否显示时间戳
+        向 QTextBrowser 添加日志，并根据时间控制选项显示时间戳
         """
-        # 添加时间戳
+        # 时间戳
         if self.show_time:
-            timestamp = datetime.now().strftime("[%H:%M:%S] ")
+            if self.show_us:
+                timestamp = datetime.now().strftime("[%H:%M:%S.%f] ")
+            else:
+                timestamp = datetime.now().strftime("[%H:%M:%S] ")
             text_to_insert = timestamp + text
         else:
             text_to_insert = text
 
-        # 生成模板，用于去重
-        tpl = re.sub(r'\d+', '#', text_to_insert)
         cursor = self.tb_log.textCursor()
 
-        if tpl == self._last_log_tpl and self._last_log_pos is not None:
-            # 替换上一行相同模板
-            cursor.setPosition(self._last_log_pos)
-            cursor.select(QTextCursor.LineUnderCursor)
-            cursor.removeSelectedText()
-            cursor.deleteChar()
+        if self.merge_repeat_enabled:
+            tpl = re.sub(r'\d+', '#', text_to_insert)
+
+            if tpl == self._last_log_tpl and self._last_log_pos is not None:
+                cursor.setPosition(self._last_log_pos)
+                cursor.select(QTextCursor.LineUnderCursor)
+                cursor.removeSelectedText()
+                cursor.deleteChar()
+            else:
+                cursor.movePosition(QTextCursor.End)
+                self._last_log_pos = cursor.position()
+                self._last_log_tpl = tpl
+                self.tb_log.moveCursor(QTextCursor.End)
         else:
             cursor.movePosition(QTextCursor.End)
-            self._last_log_pos = cursor.position()
-            self._last_log_tpl = tpl
+            self._last_log_pos = None
+            self._last_log_tpl = None
             self.tb_log.moveCursor(QTextCursor.End)
 
-        # 设置颜色并插入
         fmt = QTextCharFormat()
         fmt.setForeground(QColor(color))
         cursor.insertText(text_to_insert + "\n", fmt)

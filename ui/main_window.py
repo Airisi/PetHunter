@@ -83,10 +83,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.te_log.setReadOnly(True)
         self.dsp_fly_duration.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
         self.sp_fly_times.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
-        self.dsp_fly_duration.setMinimum(0.1)
-        self.dsp_fly_duration.setMaximum(60.0)
+        self.dsp_fly_duration.setMinimum(0)
+        self.dsp_fly_duration.setMaximum(1000000.0)
         self.sp_fly_times.setMinimum(1)
-        self.sp_fly_times.setMaximum(99)
+        self.sp_fly_times.setMaximum(1000000)
 
     def _load_config(self) -> dict:
         return load_flight_config_dict()

@@ -177,7 +177,8 @@ class Ui_MainWindow(object):
         self.gl_config.setObjectName(u"gl_config")
         self.dsp_fly_duration = QDoubleSpinBox(self.gb_config)
         self.dsp_fly_duration.setObjectName(u"dsp_fly_duration")
-        self.dsp_fly_duration.setDecimals(1)
+        self.dsp_fly_duration.setDecimals(3)
+        self.dsp_fly_duration.setMaximum(1000000.000000000000000)
         self.dsp_fly_duration.setSingleStep(0.100000000000000)
         self.dsp_fly_duration.setValue(1.000000000000000)
 
@@ -185,6 +186,7 @@ class Ui_MainWindow(object):
 
         self.sp_fly_times = QSpinBox(self.gb_config)
         self.sp_fly_times.setObjectName(u"sp_fly_times")
+        self.sp_fly_times.setMaximum(1000000)
         self.sp_fly_times.setValue(1)
 
         self.gl_config.addWidget(self.sp_fly_times, 4, 1, 1, 2)
@@ -365,7 +367,7 @@ class Ui_MainWindow(object):
         self.lbl_height.setText("")
         self.lbl_timer.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.gb_control.setTitle(QCoreApplication.translate("MainWindow", u"\u63a7\u5236", None))
-        self.btn_action.setText(QCoreApplication.translate("MainWindow", u"action", None))
+        self.btn_action.setText(QCoreApplication.translate("MainWindow", u"\u5f00\u59cb\u6d4b\u91cf", None))
         self.btn_reset.setText(QCoreApplication.translate("MainWindow", u"\u91cd\u7f6e", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("MainWindow", u"\u6d4b\u91cf", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"\u9884\u7559", None))
