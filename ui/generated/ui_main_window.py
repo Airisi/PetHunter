@@ -15,16 +15,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDoubleSpinBox, QGridLayout, QGroupBox,
-    QLabel, QLineEdit, QMainWindow, QPushButton,
-    QSizePolicy, QSpinBox, QStatusBar, QTabWidget,
-    QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractSpinBox, QApplication, QDoubleSpinBox, QGridLayout,
+    QGroupBox, QLabel, QLineEdit, QMainWindow,
+    QPushButton, QSizePolicy, QSpinBox, QStatusBar,
+    QTabWidget, QTextEdit, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(459, 434)
+        MainWindow.resize(459, 502)
         MainWindow.setStyleSheet(u"            QMainWindow {\n"
 "                background-color: #2b2d30;\n"
 "            }\n"
@@ -175,46 +175,15 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.gl_config = QGridLayout()
         self.gl_config.setObjectName(u"gl_config")
-        self.dsp_fly_duration = QDoubleSpinBox(self.gb_config)
-        self.dsp_fly_duration.setObjectName(u"dsp_fly_duration")
-        self.dsp_fly_duration.setDecimals(3)
-        self.dsp_fly_duration.setMaximum(1000000.000000000000000)
-        self.dsp_fly_duration.setSingleStep(0.100000000000000)
-        self.dsp_fly_duration.setValue(1.000000000000000)
+        self.le_action_click_x = QLineEdit(self.gb_config)
+        self.le_action_click_x.setObjectName(u"le_action_click_x")
 
-        self.gl_config.addWidget(self.dsp_fly_duration, 3, 1, 1, 2)
-
-        self.sp_fly_times = QSpinBox(self.gb_config)
-        self.sp_fly_times.setObjectName(u"sp_fly_times")
-        self.sp_fly_times.setMaximum(1000000)
-        self.sp_fly_times.setValue(1)
-
-        self.gl_config.addWidget(self.sp_fly_times, 4, 1, 1, 2)
-
-        self.lbl_fly_duration_caption = QLabel(self.gb_config)
-        self.lbl_fly_duration_caption.setObjectName(u"lbl_fly_duration_caption")
-
-        self.gl_config.addWidget(self.lbl_fly_duration_caption, 3, 0, 1, 1)
+        self.gl_config.addWidget(self.le_action_click_x, 2, 1, 1, 1)
 
         self.btn_bind_game = QPushButton(self.gb_config)
         self.btn_bind_game.setObjectName(u"btn_bind_game")
 
         self.gl_config.addWidget(self.btn_bind_game, 0, 0, 1, 1)
-
-        self.le_start_click_y = QLineEdit(self.gb_config)
-        self.le_start_click_y.setObjectName(u"le_start_click_y")
-
-        self.gl_config.addWidget(self.le_start_click_y, 1, 2, 1, 1)
-
-        self.lbl_fly_times_caption = QLabel(self.gb_config)
-        self.lbl_fly_times_caption.setObjectName(u"lbl_fly_times_caption")
-
-        self.gl_config.addWidget(self.lbl_fly_times_caption, 4, 0, 1, 1)
-
-        self.btn_capture_start_click = QPushButton(self.gb_config)
-        self.btn_capture_start_click.setObjectName(u"btn_capture_start_click")
-
-        self.gl_config.addWidget(self.btn_capture_start_click, 1, 0, 1, 1)
 
         self.le_start_click_x = QLineEdit(self.gb_config)
         self.le_start_click_x.setObjectName(u"le_start_click_x")
@@ -226,30 +195,80 @@ class Ui_MainWindow(object):
 
         self.gl_config.addWidget(self.le_action_click_y, 2, 2, 1, 1)
 
+        self.btn_mask_toggle = QPushButton(self.gb_config)
+        self.btn_mask_toggle.setObjectName(u"btn_mask_toggle")
+
+        self.gl_config.addWidget(self.btn_mask_toggle, 6, 1, 1, 1)
+
+        self.le_start_click_y = QLineEdit(self.gb_config)
+        self.le_start_click_y.setObjectName(u"le_start_click_y")
+
+        self.gl_config.addWidget(self.le_start_click_y, 1, 2, 1, 1)
+
+        self.btn_topmost = QPushButton(self.gb_config)
+        self.btn_topmost.setObjectName(u"btn_topmost")
+
+        self.gl_config.addWidget(self.btn_topmost, 6, 0, 1, 1)
+
+        self.sp_fly_times = QSpinBox(self.gb_config)
+        self.sp_fly_times.setObjectName(u"sp_fly_times")
+        self.sp_fly_times.setMaximum(1000000)
+        self.sp_fly_times.setValue(1)
+
+        self.gl_config.addWidget(self.sp_fly_times, 4, 1, 1, 2)
+
+        self.lbl_fly_times_caption = QLabel(self.gb_config)
+        self.lbl_fly_times_caption.setObjectName(u"lbl_fly_times_caption")
+
+        self.gl_config.addWidget(self.lbl_fly_times_caption, 4, 0, 1, 1)
+
+        self.btn_capture_start_click = QPushButton(self.gb_config)
+        self.btn_capture_start_click.setObjectName(u"btn_capture_start_click")
+
+        self.gl_config.addWidget(self.btn_capture_start_click, 1, 0, 1, 1)
+
         self.btn_capture_action_click = QPushButton(self.gb_config)
         self.btn_capture_action_click.setObjectName(u"btn_capture_action_click")
 
         self.gl_config.addWidget(self.btn_capture_action_click, 2, 0, 1, 1)
 
-        self.le_action_click_x = QLineEdit(self.gb_config)
-        self.le_action_click_x.setObjectName(u"le_action_click_x")
+        self.btn_trace_toggle = QPushButton(self.gb_config)
+        self.btn_trace_toggle.setObjectName(u"btn_trace_toggle")
 
-        self.gl_config.addWidget(self.le_action_click_x, 2, 1, 1, 1)
+        self.gl_config.addWidget(self.btn_trace_toggle, 6, 2, 1, 1)
+
+        self.lbl_fly_duration_caption = QLabel(self.gb_config)
+        self.lbl_fly_duration_caption.setObjectName(u"lbl_fly_duration_caption")
+
+        self.gl_config.addWidget(self.lbl_fly_duration_caption, 3, 0, 1, 1)
 
         self.le_window_name = QLineEdit(self.gb_config)
         self.le_window_name.setObjectName(u"le_window_name")
 
         self.gl_config.addWidget(self.le_window_name, 0, 1, 1, 2)
 
-        self.btn_trace_toggle = QPushButton(self.gb_config)
-        self.btn_trace_toggle.setObjectName(u"btn_trace_toggle")
+        self.dsp_fly_duration = QDoubleSpinBox(self.gb_config)
+        self.dsp_fly_duration.setObjectName(u"dsp_fly_duration")
+        self.dsp_fly_duration.setDecimals(3)
+        self.dsp_fly_duration.setMaximum(1000000.000000000000000)
+        self.dsp_fly_duration.setSingleStep(0.100000000000000)
+        self.dsp_fly_duration.setValue(1.000000000000000)
 
-        self.gl_config.addWidget(self.btn_trace_toggle, 5, 2, 1, 1)
+        self.gl_config.addWidget(self.dsp_fly_duration, 3, 1, 1, 2)
 
-        self.btn_mask_toggle = QPushButton(self.gb_config)
-        self.btn_mask_toggle.setObjectName(u"btn_mask_toggle")
+        self.dsb_fall_speed = QDoubleSpinBox(self.gb_config)
+        self.dsb_fall_speed.setObjectName(u"dsb_fall_speed")
+        self.dsb_fall_speed.setDecimals(3)
+        self.dsb_fall_speed.setMaximum(1000000.000000000000000)
+        self.dsb_fall_speed.setSingleStep(0.100000000000000)
+        self.dsb_fall_speed.setStepType(QAbstractSpinBox.DefaultStepType)
 
-        self.gl_config.addWidget(self.btn_mask_toggle, 5, 1, 1, 1)
+        self.gl_config.addWidget(self.dsb_fall_speed, 5, 1, 1, 2)
+
+        self.lbl_fall_speed = QLabel(self.gb_config)
+        self.lbl_fall_speed.setObjectName(u"lbl_fall_speed")
+
+        self.gl_config.addWidget(self.lbl_fall_speed, 5, 0, 1, 1)
 
 
         self.verticalLayout.addLayout(self.gl_config)
@@ -345,21 +364,23 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"PetHunter", None))
         self.gb_config.setTitle(QCoreApplication.translate("MainWindow", u"\u914d\u7f6e", None))
-        self.lbl_fly_duration_caption.setText(QCoreApplication.translate("MainWindow", u"\u5355\u6b21\u98de\u884c\u65f6\u957f(s)", None))
+        self.le_action_click_x.setText("")
+        self.le_action_click_x.setPlaceholderText(QCoreApplication.translate("MainWindow", u"X", None))
         self.btn_bind_game.setText(QCoreApplication.translate("MainWindow", u"\u7ed1\u5b9a\u7a97\u53e3", None))
-        self.le_start_click_y.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Y", None))
-        self.lbl_fly_times_caption.setText(QCoreApplication.translate("MainWindow", u"\u98de\u884c\u6b21\u6570", None))
-        self.btn_capture_start_click.setText(QCoreApplication.translate("MainWindow", u"\u6355\u83b7\u8d77\u98de\u70b9", None))
         self.le_start_click_x.setPlaceholderText(QCoreApplication.translate("MainWindow", u"X", None))
         self.le_action_click_y.setText("")
         self.le_action_click_y.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Y", None))
+        self.btn_mask_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8499\u5c42", None))
+        self.le_start_click_y.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Y", None))
+        self.btn_topmost.setText(QCoreApplication.translate("MainWindow", u"\u7f6e\u9876", None))
+        self.lbl_fly_times_caption.setText(QCoreApplication.translate("MainWindow", u"\u98de\u884c\u6b21\u6570", None))
+        self.btn_capture_start_click.setText(QCoreApplication.translate("MainWindow", u"\u6355\u83b7\u8d77\u98de\u70b9", None))
         self.btn_capture_action_click.setText(QCoreApplication.translate("MainWindow", u"\u6355\u83b7\u76ee\u6807\u70b9", None))
-        self.le_action_click_x.setText("")
-        self.le_action_click_x.setPlaceholderText(QCoreApplication.translate("MainWindow", u"X", None))
+        self.btn_trace_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8f68\u8ff9", None))
+        self.lbl_fly_duration_caption.setText(QCoreApplication.translate("MainWindow", u"\u5355\u6b21\u98de\u884c\u65f6\u957f(s)", None))
         self.le_window_name.setText("")
         self.le_window_name.setPlaceholderText(QCoreApplication.translate("MainWindow", u"window", None))
-        self.btn_trace_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8f68\u8ff9", None))
-        self.btn_mask_toggle.setText(QCoreApplication.translate("MainWindow", u"\u5173\u95ed\u8499\u5c42", None))
+        self.lbl_fall_speed.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u843d\u901f\u5ea6(m/s)", None))
         self.gb_status.setTitle(QCoreApplication.translate("MainWindow", u"\u72b6\u6001", None))
         self.lbl_status.setText("")
         self.lbl_status_caption.setText(QCoreApplication.translate("MainWindow", u"\u5f53\u524d\u72b6\u6001", None))

@@ -39,6 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._loading_config = True
         self._cfg_mask_enabled = True
         self._cfg_trace_enabled = True
+        self._cfg_topmost_enabled = True
 
         self._apply_theme()
         self._configure_widgets()
@@ -62,11 +63,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btn_bind_game.clicked.connect(self.bind_game_window)
         self.btn_capture_start_click.clicked.connect(self.on_capture_start_click_once)
         self.btn_capture_action_click.clicked.connect(self.on_capture_action_click_once)
+        self.btn_topmost.clicked.connect(self.toggle_topmost)
 
         self._apply_config_on_startup()
         self._set_idle_view()
         self.bind_game_window()
-        self._apply_overlay_settings_from_config()
+        self._apply_settings_from_config()
         self._loading_config = False
 
     def _apply_theme(self):
@@ -83,10 +85,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.te_log.setReadOnly(True)
         self.dsp_fly_duration.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
         self.sp_fly_times.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
-        self.dsp_fly_duration.setMinimum(0)
+        self.dsb_fall_speed.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.UpDownArrows)
+        self.dsp_fly_duration.setMinimum(0.0)
         self.dsp_fly_duration.setMaximum(1000000.0)
         self.sp_fly_times.setMinimum(1)
         self.sp_fly_times.setMaximum(1000000)
+        self.dsb_fall_speed.setMinimum(0.0)
+        self.dsb_fall_speed.setMaximum(1000000.0)
 
     def _load_config(self) -> dict:
         return load_flight_config_dict()
@@ -122,19 +127,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self._cfg_mask_enabled = bool(config.get("mask_enabled", True))
         self._cfg_trace_enabled = bool(config.get("trace_enabled", True))
+        self._cfg_topmost_enabled = bool(config.get("topmost_enabled", True))
 
-    def _apply_overlay_settings_from_config(self) -> None:
-        # Trace 独立于蒙层开关
-        self._set_trace_enabled(self._cfg_trace_enabled)
-        # 蒙层需要已绑定窗口后才能显示
+    def _apply_settings_from_config(self) -> None:
+        # 轨迹层蒙板配置
+        if self._cfg_trace_enabled and self.mouse_trace_mask.game_hwnd != 0:
+            self.mouse_trace_mask.set_trace_enabled(self._cfg_trace_enabled)
+            self.btn_trace_toggle.setText("关闭轨迹")
+        else:
+            self.mouse_trace_mask.hide()
+            self.btn_trace_toggle.setText("开启轨迹")
+
+        # 数据层蒙板配置
         if self._cfg_mask_enabled and self.game_mask.game_hwnd != 0:
             self.game_mask.follow_game_window()
             self.game_mask.show()
-            self.game_mask.raise_()
+            self.game_mask.raise_()#
             self.btn_mask_toggle.setText("关闭蒙层")
         else:
             self.game_mask.hide()
             self.btn_mask_toggle.setText("开启蒙层")
+
+        # 置顶
+        self.toggle_topmost(self._cfg_topmost_enabled)
 
     def _set_idle_view(self):
         self.lbl_status.setText("待命")
@@ -218,6 +233,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.btn_trace_toggle.setText("关闭轨迹" if state else "开启轨迹")
         self.log.info("Trace display enabled.\n" if state else "Trace display disabled.\n")
         self._save_config({"trace_enabled": state})
+
+    def toggle_topmost(self, enable: bool | None = None):
+        state = enable
+
+        if state is None:
+            is_top = self.windowFlags() & Qt.WindowStaysOnTopHint
+            state = not bool(is_top)
+            self._save_config({"topmost_enabled": state})
+
+        self.setWindowFlag(Qt.WindowStaysOnTopHint, state)
+        self.show()
 
     def update_height(self, height):
         self.lbl_height.setText(f"{height:.2f} m")
@@ -501,8 +527,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if not file_exists:
                 writer.writeheader()
             writer.writerow({k: ("" if row.get(k, None) is None else row.get(k, "")) for k in header})
-
-    def on_topmost(self):
-        is_top = self.windowFlags() & Qt.WindowStaysOnTopHint
-        self.setWindowFlag(Qt.WindowStaysOnTopHint, not bool(is_top))
-        self.show()

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>459</width>
-    <height>434</height>
+    <height>502</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -165,36 +165,13 @@
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <layout class="QGridLayout" name="gl_config">
-             <item row="3" column="1" colspan="2">
-              <widget class="QDoubleSpinBox" name="dsp_fly_duration">
-               <property name="decimals">
-                <number>3</number>
-               </property>
-               <property name="maximum">
-                <double>1000000.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="value">
-                <double>1.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1" colspan="2">
-              <widget class="QSpinBox" name="sp_fly_times">
-               <property name="maximum">
-                <number>1000000</number>
-               </property>
-               <property name="value">
-                <number>1</number>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="lbl_fly_duration_caption">
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="le_action_click_x">
                <property name="text">
-                <string>单次飞行时长(s)</string>
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>X</string>
                </property>
               </widget>
              </item>
@@ -202,27 +179,6 @@
               <widget class="QPushButton" name="btn_bind_game">
                <property name="text">
                 <string>绑定窗口</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QLineEdit" name="le_start_click_y">
-               <property name="placeholderText">
-                <string>Y</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="lbl_fly_times_caption">
-               <property name="text">
-                <string>飞行次数</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="btn_capture_start_click">
-               <property name="text">
-                <string>捕获起飞点</string>
                </property>
               </widget>
              </item>
@@ -243,6 +199,51 @@
                </property>
               </widget>
              </item>
+             <item row="6" column="1">
+              <widget class="QPushButton" name="btn_mask_toggle">
+               <property name="text">
+                <string>关闭蒙层</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLineEdit" name="le_start_click_y">
+               <property name="placeholderText">
+                <string>Y</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
+              <widget class="QPushButton" name="btn_topmost">
+               <property name="text">
+                <string>置顶</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="2">
+              <widget class="QSpinBox" name="sp_fly_times">
+               <property name="maximum">
+                <number>1000000</number>
+               </property>
+               <property name="value">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="lbl_fly_times_caption">
+               <property name="text">
+                <string>飞行次数</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="btn_capture_start_click">
+               <property name="text">
+                <string>捕获起飞点</string>
+               </property>
+              </widget>
+             </item>
              <item row="2" column="0">
               <widget class="QPushButton" name="btn_capture_action_click">
                <property name="text">
@@ -250,13 +251,17 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="le_action_click_x">
+             <item row="6" column="2">
+              <widget class="QPushButton" name="btn_trace_toggle">
                <property name="text">
-                <string/>
+                <string>关闭轨迹</string>
                </property>
-               <property name="placeholderText">
-                <string>X</string>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="lbl_fly_duration_caption">
+               <property name="text">
+                <string>单次飞行时长(s)</string>
                </property>
               </widget>
              </item>
@@ -270,17 +275,42 @@
                </property>
               </widget>
              </item>
-             <item row="5" column="2">
-              <widget class="QPushButton" name="btn_trace_toggle">
-               <property name="text">
-                <string>关闭轨迹</string>
+             <item row="3" column="1" colspan="2">
+              <widget class="QDoubleSpinBox" name="dsp_fly_duration">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
-              <widget class="QPushButton" name="btn_mask_toggle">
+             <item row="5" column="1" colspan="2">
+              <widget class="QDoubleSpinBox" name="dsb_fall_speed">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::DefaultStepType</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="lbl_fall_speed">
                <property name="text">
-                <string>关闭蒙层</string>
+                <string>下落速度(m/s)</string>
                </property>
               </widget>
              </item>
