@@ -1,5 +1,6 @@
-import ctypes
 import csv
+import time
+import ctypes
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, Qt
@@ -47,7 +48,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.measure.height_changed.connect(self.update_height)
         self.measure.state_changed.connect(self.update_status)
         self.measure.time_remaining_changed.connect(self.on_time_remaining)
-        self.measure.fly_finished.connect(self.on_fly_finished)
+        self.measure.fly_finished.connect(self.on_fly_once_finished)
         self.measure.falling_started.connect(self.on_falling_started)
 
         # UI 参数变更时同步到配置文件
@@ -139,7 +140,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_status.setText("待命")
         self.lbl_height.setText("0.00 m")
         self.lbl_timer.setText("0.000 s")
-        self.te_log.setPlainText(
+        self.log.info(
             "PetHunter 辅助测量台\n"
             "等待开始测量...\n\n"
             "结果将汇总显示：\n"
@@ -307,6 +308,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._save_config({"action_click": {"x": int(x), "y": int(y)}})
 
     def _resolve_click_target(self, target_kind="action"):
+        '''
+        获取指定点击目标在游戏窗口中的坐标
+        '''
         if not self.game_hwnd:
             raise RuntimeError("game window not bound")
 
@@ -316,6 +320,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             x_text = self.le_action_click_x.text().strip()
             y_text = self.le_action_click_y.text().strip()
+
+        # 获取游戏窗口的尺寸
         _, _, width, height = WindowTool.get_window_rect_scaled(self.game_hwnd, client_area=True)
         if width <= 0 or height <= 0:
             raise RuntimeError("invalid game client rect")
@@ -324,44 +330,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         y = int(y_text) if y_text else height - 50
         return x, y
 
-    def _draw_auto_click_path(self, path_points):
-        if not path_points:
+    def _draw_auto_click_point(self, point):
+        if not point:
             return
 
         self.mouse_trace_mask.follow_game_window()
-        point_x, point_y = path_points[-1]
+        point_x, point_y = point
         self.mouse_trace_mask.add_click_point(QPoint(point_x, point_y))
 
     def _log_auto_click(self, x, y):
+        '''
+        记录鼠标点击到日志标签
+        '''
         self.game_mask.show_message(f"Clicked trigger point ({x}, {y})", 2000)
         self.game_mask.add_trace(f"[{self._get_time_str()}] Clicked trigger point ({x}, {y})")
         self.log.info(f"Sent trigger click ({x}, {y})\n")
 
     def _send_auto_click(self, target_kind="action"):
+        '''
+        向游戏窗口发送自动点击（包含轨迹绘制与鼠标位置恢复）
+        '''
         x, y = self._resolve_click_target(target_kind)
         try:
             import win32api
 
+            # 获取当前鼠标位置
             original_pos = win32api.GetCursorPos()
         except Exception:
             original_pos = None
+
+        # 执行鼠标点击
         click_info = WindowTool.click_at(self.game_hwnd, x, y)
-        self._draw_auto_click_path(click_info.get("path_points", []))
+        # 绘制轨迹
+        self._draw_auto_click_point(click_info.get("click_point", (0, 0)))
         if original_pos is not None:
             try:
                 win32api.SetCursorPos(original_pos)
             except Exception:
                 pass
         self._log_auto_click(x, y)
-
-    def on_fly_finished(self, done, total):
-        if not self.is_measuring or done >= total or not self.game_hwnd:
-            return
-
-        try:
-            self._send_auto_click("action")
-        except Exception as exc:
-            self.log.warning(f"Trigger click failed: {exc}\n")
 
     def on_start(self):
         try:
@@ -375,51 +382,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.measure.save_config()
         self._save_config({"fly_duration": duration, "fly_times": times})
 
-        try:
-            import win32api
-
-            original_pos = win32api.GetCursorPos()
-        except Exception:
-            original_pos = None
-
         if self.game_hwnd:
             try:
                 self._send_auto_click("start")
+                time.sleep(0.1) # @TODO: 需要根据测试结果修改为实际延时
+                self._send_auto_click("action")
             except Exception as exc:
                 self.log.warning(f"触发点击失败: {exc}\n")
         else:
             self.log.warning("尚未绑定目标窗口，无法发送点击。\n")
 
-        if original_pos is not None:
-            try:
-                import win32api
-
-                win32api.SetCursorPos(original_pos)
-            except Exception:
-                pass
-
-        self.btn_action.setText("标记落地")
         self.is_measuring = True
-        # 先禁用，等待上升全部结束后才启用标记落地按钮
         self.btn_action.setEnabled(False)
+        self.btn_action.setText("标记落地")
         self.lbl_status.setText("准备起飞")
-        self.te_log.setPlainText(
+        self.log.info(
             "测量进行中\n"
             f"单次飞行时长: {duration:.1f} s\n"
             f"飞行次数: {times}\n"
-            "等待落地标记...\n"
+            "等待落地标记...\n\n"
         )
-        self.log.info(f"开始测量: {times} 次飞行, 单次 {duration:.1f} s\n")
         self.measure.start_measure(times)
+
+    def on_fly_once_finished(self, done, total):
+        if not self.is_measuring or done >= total or not self.game_hwnd:
+            return
+
+        try:
+            self._send_auto_click("action")
+        except Exception as exc:
+            self.log.warning(f"Trigger click failed: {exc}\n")
 
     def on_land(self):
         data = self.measure.mark_land(0.0)
         if not data:
-            # 理论上按钮在上升阶段会被禁用，这里避免误触造成用户卡住
             self.btn_action.setEnabled(True)
             return
 
-        self.te_log.setPlainText(self._format_result(data))
+        self.log.info(self._format_result(data))
         self.btn_action.setText("开始测量")
         self.is_measuring = False
         self.btn_action.setEnabled(True)

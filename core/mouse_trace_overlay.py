@@ -32,7 +32,7 @@ class MouseTraceOverlay(QWidget):
         self.game_hwnd = hwnd
 
     def follow_game_window(self):
-        if self.game_hwnd == 0:
+        if self.game_hwnd == 0 or not self.trace_enabled:
             return
 
         try:

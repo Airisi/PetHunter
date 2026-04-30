@@ -5,6 +5,11 @@ import win32process
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent))
+from behavior import Behavior
+
 
 class WindowTool:
     _capture_timer = None
@@ -77,28 +82,51 @@ class WindowTool:
 
     @staticmethod
     def click_at(hwnd: int, x: int, y: int):
-        dpi_ratio = WindowTool.get_dpi_ratio()
-        client_x = int(round(x * dpi_ratio))
-        client_y = int(round(y * dpi_ratio))
-        client_left, client_top = win32gui.ClientToScreen(hwnd, (0, 0))
-        screen_x = client_left + client_x
-        screen_y = client_top + client_y
-        start_x, start_y = win32api.GetCursorPos()
+        """
+        点击指定窗口的指定位置
 
-        WindowTool._bring_window_to_front(hwnd)
+        x, y 为窗口客户区坐标 (client 坐标，非屏幕坐标)
+        """
+
+        # 进行坐标抖动
+        x, y = Behavior.jitter_point(x, y)
+
+        # 将客户端坐标转换为屏幕坐标，并考虑 DPI 缩放
+        dpi_ratio = WindowTool.get_dpi_ratio()
+        screen_x = int(round(x * dpi_ratio))
+        screen_y = int(round(y * dpi_ratio))
+        client_left, client_top = win32gui.ClientToScreen(hwnd, (0, 0))
+        screen_x = client_left + screen_x
+        screen_y = client_top + screen_y
+        # start_x, start_y = win32api.GetCursorPos()
+
+        # 如果目标窗口不是当前前台窗口，尝试将其置于前台
+        if not WindowTool.is_foreground(hwnd):
+            WindowTool._bring_window_to_front(hwnd)
+
+        # 移动鼠标到目标位置并点击
         win32api.SetCursorPos((screen_x, screen_y))
+        # 等待一点时间
+        Behavior.sleep()
+
+        # 按下鼠标
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+       # 等待一点时间
+        Behavior.sleep()
+
+        # 抬起鼠标
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
 
+        # 返回点击信息，包括起始位置、目标位置和路径点（用于绘制轨迹）
         return {
-            "start_screen": (start_x, start_y),
-            "target_screen": (screen_x, screen_y),
-            "path_points": WindowTool._interpolate_points(
-                int(round((start_x - client_left) / dpi_ratio)),
-                int(round((start_y - client_top) / dpi_ratio)),
-                x,
-                y,
-            ),
+            # "start_screen": (start_x, start_y),
+            "click_point": (x, y),
+            # "path_points": WindowTool._interpolate_points(
+            #     int(round((start_x - client_left) / dpi_ratio)),
+            #     int(round((start_y - client_top) / dpi_ratio)),
+            #     x,
+            #     y,
+            # ),
         }
 
     @staticmethod
@@ -161,6 +189,14 @@ class WindowTool:
             client_x, client_y = win32gui.ScreenToClient(hwnd, (screen_x, screen_y))
             _, _, width, height = WindowTool.get_window_rect(hwnd, client_area=True)
             return 0 <= client_x < width and 0 <= client_y < height
+        except Exception:
+            return False
+
+    @staticmethod
+    def is_foreground(hwnd: int) -> bool:
+        try:
+            fg = win32gui.GetForegroundWindow()
+            return fg == hwnd or win32gui.GetAncestor(fg, win32con.GA_ROOT) == hwnd
         except Exception:
             return False
 
