@@ -27,7 +27,7 @@ class GameMaskOverlay(QWidget):
         self._init_ui()
 
     def _init_ui(self):
-        font = QFont("Microsoft YaHei", 6)
+        font = QFont("Microsoft YaHei", 9)
 
         self.lbl_height = QLabel("高度 0.00 m")
         self.lbl_height.setFont(font)

@@ -249,7 +249,7 @@ class Ui_MainWindow(object):
 
         self.dsp_fly_duration = QDoubleSpinBox(self.gb_config)
         self.dsp_fly_duration.setObjectName(u"dsp_fly_duration")
-        self.dsp_fly_duration.setDecimals(3)
+        self.dsp_fly_duration.setDecimals(4)
         self.dsp_fly_duration.setMaximum(1000000.000000000000000)
         self.dsp_fly_duration.setSingleStep(0.100000000000000)
         self.dsp_fly_duration.setValue(1.000000000000000)

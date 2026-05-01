@@ -17,18 +17,35 @@ class WindowTool:
     _capture_callback = None
     _capture_last_down = False
 
+    _capture_key_timer = None
+    _capture_key_callback = None
+    _capture_last_state = {}
+
     @staticmethod
     def find_window_by_title(title: str) -> int:
         hwnd_list = []
+        minimized_list = []
 
         def callback(hwnd, _):
             if win32gui.IsWindowVisible(hwnd):
                 win_title = win32gui.GetWindowText(hwnd)
                 if title.lower() in win_title.lower():
-                    hwnd_list.append(hwnd)
+                    if win32gui.IsIconic(hwnd):
+                        minimized_list.append(hwnd)   # 最小化的
+                    else:
+                        hwnd_list.append(hwnd)       # 未最小化的
 
         win32gui.EnumWindows(callback, None)
-        return hwnd_list[0] if hwnd_list else 0
+
+        # 优先返回未最小化窗口
+        if hwnd_list:
+            return hwnd_list[0]
+
+        # 否则返回最小化窗口
+        if minimized_list:
+            return minimized_list[0]
+
+        return 0
 
     @staticmethod
     def get_window_title(hwnd: int) -> str:
@@ -98,7 +115,6 @@ class WindowTool:
         client_left, client_top = win32gui.ClientToScreen(hwnd, (0, 0))
         screen_x = client_left + screen_x
         screen_y = client_top + screen_y
-        # start_x, start_y = win32api.GetCursorPos()
 
         # 如果目标窗口不是当前前台窗口，尝试将其置于前台
         if not WindowTool.is_foreground(hwnd):
@@ -106,27 +122,45 @@ class WindowTool:
 
         # 移动鼠标到目标位置并点击
         win32api.SetCursorPos((screen_x, screen_y))
-        # 等待一点时间
         Behavior.sleep()
 
         # 按下鼠标
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-       # 等待一点时间
         Behavior.sleep()
 
         # 抬起鼠标
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
 
-        # 返回点击信息，包括起始位置、目标位置和路径点（用于绘制轨迹）
         return {
-            # "start_screen": (start_x, start_y),
             "click_point": (x, y),
-            # "path_points": WindowTool._interpolate_points(
-            #     int(round((start_x - client_left) / dpi_ratio)),
-            #     int(round((start_y - client_top) / dpi_ratio)),
-            #     x,
-            #     y,
-            # ),
+        }
+
+    @staticmethod
+    def key_press(hwnd: int, vk_code: int):
+        """
+        向指定窗口发送一次按键（按下 + 抬起）
+
+        :param hwnd: 目标窗口句柄
+        :param vk_code: 虚拟键值 win32con.VK_*
+        :return: dict
+        """
+
+        if not hwnd or not win32gui.IsWindow(hwnd):
+            return None
+
+        # 如果不是前台窗口，尝试切换
+        if not WindowTool.is_foreground(hwnd):
+            WindowTool._bring_window_to_front(hwnd)
+
+        # 按下
+        win32api.keybd_event(vk_code, 0, 0, 0)
+        Behavior.sleep()
+
+        # 抬起
+        win32api.keybd_event(vk_code, 0, win32con.KEYEVENTF_KEYUP, 0)
+
+        return {
+            "vk_code": vk_code
         }
 
     @staticmethod
@@ -246,3 +280,66 @@ class WindowTool:
 
         win32gui.EnumWindows(callback, None)
         return results
+
+    @staticmethod
+    def start_capture_key(callback, vk_list=None, interval_ms=20):
+        """
+        捕获键盘按键（按下瞬间触发）
+
+        :param callback: 回调函数 callback(vk_code)
+        :param vk_list: 监听键列表
+        :param interval_ms: 轮询间隔
+        """
+
+        WindowTool.stop_capture_key()
+
+        if vk_list is None:
+            vk_list = [
+                win32con.VK_RETURN,
+                win32con.VK_SPACE,
+                win32con.VK_ESCAPE,
+                win32con.VK_LEFT,
+                win32con.VK_RIGHT,
+                win32con.VK_UP,
+                win32con.VK_DOWN,
+            ]
+
+        WindowTool._capture_key_callback = callback
+        WindowTool._capture_last_state = {
+            vk: bool(win32api.GetAsyncKeyState(vk) & 0x8000)
+            for vk in vk_list
+        }
+
+        timer = QTimer()
+        timer.setInterval(interval_ms)
+        timer.timeout.connect(lambda: WindowTool._poll_capture_key(vk_list))
+        timer.start()
+
+        WindowTool._capture_key_timer = timer
+
+    @staticmethod
+    def stop_capture_key():
+        if WindowTool._capture_key_timer:
+            WindowTool._capture_key_timer.stop()
+            WindowTool._capture_key_timer.deleteLater()
+            WindowTool._capture_key_timer = None
+
+        WindowTool._capture_key_callback = None
+        WindowTool._capture_last_state = {}
+
+    @staticmethod
+    def _poll_capture_key(vk_list):
+        callback = WindowTool._capture_key_callback
+        if callback is None:
+            WindowTool.stop_capture_key()
+            return
+
+        for vk in vk_list:
+            is_down = bool(win32api.GetAsyncKeyState(vk) & 0x8000)
+            last = WindowTool._capture_last_state.get(vk, False)
+
+            # 只在按下瞬间触发
+            if is_down and not last:
+                callback(vk)
+
+            WindowTool._capture_last_state[vk] = is_down

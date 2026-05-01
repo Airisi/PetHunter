@@ -1,6 +1,7 @@
 import csv
 import time
 import ctypes
+import win32con
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, Qt
@@ -28,7 +29,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # self.showMinimized()
         # self.setGeometry(950, 324, 500, 500)
-        self.move(950, 324)
+        self.move(1300, 400)
 
         self.game_hwnd = None
         self.measure = FlightMeasureTool()
@@ -70,6 +71,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.bind_game_window()
         self._apply_settings_from_config()
         self._loading_config = False
+
+        # WindowTool.enum_windows()
 
     def _apply_theme(self):
         DWMWA_USE_IMMERSIVE_DARK_MODE = 20
@@ -396,6 +399,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 pass
         self._log_auto_click(x, y)
 
+    def _log_auto_key_press(self, vk_code: int):
+        '''
+        记录鼠标点击到日志标签
+        '''
+        self.game_mask.show_message(f"Send trigger key press ({vk_code})", 2000)
+        self.log.info(f"Sent trigger key press ({vk_code})\n")
+
+    def _send_auto_key_press(self, vk_code: int):
+        '''
+        向游戏窗口发送自动按键后鼠标位置恢复
+        '''
+        # try:
+        #     import win32api
+
+        #     # 获取当前鼠标位置
+        #     original_pos = win32api.GetCursorPos()
+        # except Exception:
+        #     original_pos = None
+
+        # 执行鼠标点击
+        WindowTool.key_press(self.game_hwnd, vk_code)
+        # if original_pos is not None:
+        #     try:
+        #         win32api.SetCursorPos(original_pos)
+        #     except Exception:
+        #         pass
+        self._log_auto_key_press(vk_code)
+
     def on_start(self):
         try:
             duration = float(self.dsp_fly_duration.value())
@@ -410,9 +441,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         if self.game_hwnd:
             try:
-                self._send_auto_click("start")
-                time.sleep(0.1) # @TODO: 需要根据测试结果修改为实际延时
-                self._send_auto_click("action")
+                # self._send_auto_click("start")
+                # time.sleep(0.2)
+                # self._send_auto_click("action")
+
+                WindowTool.key_press(self.game_hwnd, win32con.VK_SPACE)
+                time.sleep(0.2)
+                # 上升 10 次高度
+                for _ in range(6):
+                    WindowTool.key_press(self.game_hwnd, win32con.VK_SPACE)
+                    time.sleep(1.25)
             except Exception as exc:
                 self.log.warning(f"触发点击失败: {exc}\n")
         else:
@@ -435,7 +473,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         try:
-            self._send_auto_click("action")
+            # self._send_auto_click("action")
+            self._send_auto_key_press(win32con.VK_SPACE)
         except Exception as exc:
             self.log.warning(f"Trigger click failed: {exc}\n")
 
