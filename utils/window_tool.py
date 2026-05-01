@@ -2,6 +2,7 @@ import win32api
 import win32con
 import win32gui
 import win32process
+import time
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
@@ -12,6 +13,10 @@ from behavior import Behavior
 
 
 class WindowTool:
+    _capture_image_timer = None
+    _capture_image_hwnd = 0
+    _capture_image_callback = None
+
     _capture_timer = None
     _capture_hwnd = 0
     _capture_callback = None
@@ -20,6 +25,117 @@ class WindowTool:
     _capture_key_timer = None
     _capture_key_callback = None
     _capture_last_state = {}
+
+    @staticmethod
+    def capture_window(hwnd: int):
+        """
+        截图指定窗口客户区
+
+        :param hwnd: 窗口句柄
+        :return: (width, height, raw_bytes) 或 None
+        """
+
+        if not hwnd or not win32gui.IsWindow(hwnd):
+            return None
+
+        try:
+            # 获取客户区大小
+            left, top, right, bottom = win32gui.GetClientRect(hwnd)
+            width = right - left
+            height = bottom - top
+
+            if width <= 0 or height <= 0:
+                return None
+
+            # 获取窗口 DC
+            hwnd_dc = win32gui.GetWindowDC(hwnd)
+            mfc_dc = win32ui.CreateDCFromHandle(hwnd_dc)
+            save_dc = mfc_dc.CreateCompatibleDC()
+
+            # 创建位图
+            save_bitmap = win32ui.CreateBitmap()
+            save_bitmap.CreateCompatibleBitmap(mfc_dc, width, height)
+            save_dc.SelectObject(save_bitmap)
+
+            # 拷贝图像
+            save_dc.BitBlt(
+                (0, 0),
+                (width, height),
+                mfc_dc,
+                (0, 0),
+                win32con.SRCCOPY
+            )
+
+            # 获取数据
+            bmpinfo = save_bitmap.GetInfo()
+            bmpstr = save_bitmap.GetBitmapBits(True)
+
+            # 释放资源
+            win32gui.DeleteObject(save_bitmap.GetHandle())
+            save_dc.DeleteDC()
+            mfc_dc.DeleteDC()
+            win32gui.ReleaseDC(hwnd, hwnd_dc)
+
+            return bmpinfo["bmWidth"], bmpinfo["bmHeight"], bmpstr
+
+        except Exception:
+            return None
+
+    @staticmethod
+    def start_capture_image(hwnd: int, callback, interval_ms=500):
+        """
+        开启定时截图
+
+        :param hwnd: 目标窗口
+        :param callback: 回调 callback(width, height, raw_bytes)
+        :param interval_ms: 截图间隔(ms)
+        """
+
+        WindowTool.stop_capture_image()
+
+        if not hwnd or not win32gui.IsWindow(hwnd):
+            raise RuntimeError("invalid hwnd")
+
+        WindowTool._capture_image_hwnd = hwnd
+        WindowTool._capture_image_callback = callback
+
+        timer = QTimer()
+        timer.setInterval(interval_ms)
+        timer.timeout.connect(WindowTool._poll_capture_image)
+        timer.start()
+
+        WindowTool._capture_image_timer = timer
+
+    @staticmethod
+    def stop_capture_image():
+        """
+        停止截图
+        """
+
+        if WindowTool._capture_image_timer:
+            WindowTool._capture_image_timer.stop()
+            WindowTool._capture_image_timer.deleteLater()
+            WindowTool._capture_image_timer = None
+
+        WindowTool._capture_image_hwnd = 0
+        WindowTool._capture_image_callback = None
+
+    @staticmethod
+    def _poll_capture_image():
+        """
+        定时截图轮询
+        """
+
+        hwnd = WindowTool._capture_image_hwnd
+        callback = WindowTool._capture_image_callback
+
+        if not hwnd or callback is None or not win32gui.IsWindow(hwnd) or not WindowTool.is_foreground(hwnd):
+            WindowTool.stop_capture_image()
+            return
+
+        result = WindowTool.capture_window(hwnd)
+        if result:
+            callback(*result)
 
     @staticmethod
     def find_window_by_title(title: str) -> int:
@@ -266,6 +382,37 @@ class WindowTool:
             py = int(round(y1 + dy * ratio))
             points.append((px, py))
         return points
+
+    @staticmethod
+    def drag_view(dx: int, dy: int, duration=0.1, steps=10):
+        """
+        通过鼠标相对移动调整视角（不需要按键）
+
+        :param dx: 水平移动
+        :param dy: 垂直移动（正数=向下）
+        :param duration: 持续时间
+        """
+
+        step_dx = int(dx / steps)
+        step_dy = int(dy / steps)
+
+        for _ in range(steps):
+            # 相对移动（关键）
+            win32api.mouse_event(
+                win32con.MOUSEEVENTF_MOVE,
+                step_dx,
+                step_dy
+            )
+            if duration > 0 and steps > 0:
+                time.sleep(duration / steps)
+
+    @staticmethod
+    def set_top_view():
+        """
+        拉到俯视最大角度
+        """
+        # 连续多次向下移动（直到极限）
+        WindowTool.drag_view(0, 10000, 1, 10)
 
     @staticmethod
     def enum_windows():

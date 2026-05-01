@@ -1,22 +1,27 @@
 import csv
 import time
 import ctypes
+import win32api
 import win32con
+import win32gui
+import win32process
 from datetime import datetime
 
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtWidgets import QAbstractSpinBox, QMainWindow
+from PySide6.QtWidgets import QAbstractSpinBox, QMainWindow, QApplication
 
 from core.mask_overlay import GameMaskOverlay
 from core.mouse_trace_overlay import MouseTraceOverlay
 from ui.generated.ui_main_window import Ui_MainWindow
+from config.paths import screenshots_dir
 
 import sys
-from pathlib import Path
+from pathlib import Path 
 sys.path.append(str(Path(__file__).parent.parent))
 from utils import FlightMeasureTool, LogManager, WindowTool
 from config.paths import measurement_results_csv_path
 from config.flight_config import load_flight_config_dict, update_flight_config_dict
+from utils.behavior import Behavior
 
 RESULTS_CSV_PATH = measurement_results_csv_path()
 
@@ -41,6 +46,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._cfg_mask_enabled = True
         self._cfg_trace_enabled = True
         self._cfg_topmost_enabled = True
+        self.screenshots_dir = screenshots_dir()
+        self.screenshots_dir.mkdir(parents=True, exist_ok=True)
+        self.screenshots_index = 0
+        # 飞行按键状态机
+        self.fly_key_state = 0      # 0=W,1=D,2=S,3=A
+        self.fly_count = 0
+        self.fly_current_vk = None
+
 
         self._apply_theme()
         self._configure_widgets()
@@ -380,23 +393,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         向游戏窗口发送自动点击（包含轨迹绘制与鼠标位置恢复）
         '''
         x, y = self._resolve_click_target(target_kind)
-        try:
-            import win32api
+        # try:
+        #     import win32api
 
-            # 获取当前鼠标位置
-            original_pos = win32api.GetCursorPos()
-        except Exception:
-            original_pos = None
+        #     # 获取当前鼠标位置
+        #     original_pos = win32api.GetCursorPos()
+        # except Exception:
+        #     original_pos = None
 
         # 执行鼠标点击
         click_info = WindowTool.click_at(self.game_hwnd, x, y)
         # 绘制轨迹
         self._draw_auto_click_point(click_info.get("click_point", (0, 0)))
-        if original_pos is not None:
-            try:
-                win32api.SetCursorPos(original_pos)
-            except Exception:
-                pass
+        # if original_pos is not None:
+        #     try:
+        #         win32api.SetCursorPos(original_pos)
+        #     except Exception:
+        #         pass
         self._log_auto_click(x, y)
 
     def _log_auto_key_press(self, vk_code: int):
@@ -427,6 +440,34 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #         pass
         self._log_auto_key_press(vk_code)
 
+    def _fly_key_control(self, fly_limit: int):
+        VK_W, VK_D, VK_S, VK_A = ord('W'), ord('D'), ord('S'), ord('A')
+        key_map = [VK_W, VK_D, VK_S, VK_A]
+
+        next_vk = key_map[self.fly_key_state]
+
+        # 第一次按下
+        if self.fly_current_vk is None:
+            self.fly_current_vk = next_vk
+            win32api.keybd_event(next_vk, 0, 0, 0)
+        else:
+            self.fly_count += 1
+
+        if self.fly_count >= fly_limit:
+            # 松开当前键
+            win32api.keybd_event(self.fly_current_vk, 0, win32con.KEYEVENTF_KEYUP, 0)
+
+            # 切换状态
+            self.fly_key_state = (self.fly_key_state + 1) % 4
+            self.fly_current_vk = key_map[self.fly_key_state]
+
+            self.fly_count = 0
+
+            time.sleep(0.1)
+
+            # 按下新键
+            win32api.keybd_event(self.fly_current_vk, 0, 0, 0)
+
     def on_start(self):
         try:
             duration = float(self.dsp_fly_duration.value())
@@ -438,6 +479,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.measure.fly_duration = duration
         self.measure.save_config()
         self._save_config({"fly_duration": duration, "fly_times": times})
+        import traceback
 
         if self.game_hwnd:
             try:
@@ -445,14 +487,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # time.sleep(0.2)
                 # self._send_auto_click("action")
 
+                # 如果不是前台窗口，尝试切换
+                # if not WindowTool.is_foreground(self.game_hwnd):
+                WindowTool._bring_window_to_front(self.game_hwnd)
+                # WindowTool.key_press(self.game_hwnd, win32con.VK_SPACE)
+                # self._send_auto_click("start")
+                # time.sleep(1)
+                # # 拉到俯视角
+
+                # WindowTool.set_top_view()
+                time.sleep(0.5)
                 WindowTool.key_press(self.game_hwnd, win32con.VK_SPACE)
                 time.sleep(0.2)
-                # 上升 10 次高度
+                # 上升 6 次高度
                 for _ in range(6):
                     WindowTool.key_press(self.game_hwnd, win32con.VK_SPACE)
                     time.sleep(1.25)
-            except Exception as exc:
-                self.log.warning(f"触发点击失败: {exc}\n")
+                    QApplication.processEvents()
+
+                # WindowTool.start_capture_image(
+                #     self.game_hwnd,
+                #     self.on_capture_frame,
+                #     interval_ms=5000
+                # )
+
+            except Exception:
+                self.log.warning("触发点击失败:\n" + traceback.format_exc())
         else:
             self.log.warning("尚未绑定目标窗口，无法发送点击。\n")
 
@@ -468,13 +528,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.measure.start_measure(times)
 
+    def on_capture_frame(self, width, height, raw_bytes):
+        """
+        截图回调（保存到 run/captures）
+
+        :param width: 宽
+        :param height: 高
+        :param raw_bytes: 原始图像数据(BGR)
+        """
+
+        # 时间戳命名
+        # timestamp = int(time.time() * 1000)
+        # file_path = self.capture_dir / f"frame_{timestamp}.png"
+
+        # 递增编号
+        file_path = self.screenshots_dir / f"frame_{self.screenshots_index:05d}.png"
+        self.screenshots_index += 1
+
+        image = QImage(raw_bytes, width, height, QImage.Format_BGR888)
+        image.save(str(file_path))
+
     def on_fly_once_finished(self, done, total):
         if not self.is_measuring or done >= total or not self.game_hwnd:
+            if self.fly_current_vk is not None:
+                win32api.keybd_event(self.fly_current_vk, 0, win32con.KEYEVENTF_KEYUP, 0)
+            WindowTool.stop_capture_image()
             return
 
         try:
             # self._send_auto_click("action")
             self._send_auto_key_press(win32con.VK_SPACE)
+            time.sleep(0.1)
+            self._fly_key_control(1)
+            # WindowTool.drag_view(500, 0, 0.2, 2)
+
         except Exception as exc:
             self.log.warning(f"Trigger click failed: {exc}\n")
 
@@ -484,6 +571,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_action.setEnabled(True)
             return
 
+        WindowTool.stop_capture_image()
         self.log.info(self._format_result(data))
         self.btn_action.setText("开始测量")
         self.is_measuring = False
@@ -499,6 +587,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_action.setEnabled(True)
 
     def on_reset(self):
+        if self.fly_current_vk is not None:
+            win32api.keybd_event(self.fly_current_vk, 0, win32con.KEYEVENTF_KEYUP, 0)
+        self.fly_key_state = 0      # 0=W,1=D,2=S,3=A
+        self.fly_count = 0
+        self.fly_current_vk = None
+        WindowTool.stop_capture_image()
         WindowTool.stop_capture_click()
         self.measure.reset()
         self.btn_action.setText("开始测量")
